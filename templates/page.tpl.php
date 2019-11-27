@@ -71,13 +71,27 @@
 //drupal_add_library('system', 'ui.accordion');
 //drupal_add_js('jQuery(document).ready(function() {jQuery("#accordion").accordion();});','inline');
 ?>
+<?php 
+  //Vito: https://uk-cb-new-statesman.pantheonsite.io/
 
 
+//if(!user_is_logged_in()){
+   //list divs to display on true 
+};
+
+// else statement not realy required 
+//else{
+   //If we will display something instead 
+};
+
+?>
+<?php if(!user_is_logged_in()): ?>
 <div id='div-out_of_banner'>
   <script type='text/javascript'>
 googletag.display('div-out_of_banner');
 </script>
 </div>
+<?php endif; ?>
 <?php if(arg(0) == 'long-reads'): ?>
 <div class="page-taxonomy-term long-reads-theme">
 <?php endif; ?>
@@ -287,6 +301,7 @@ googletag.display('div-out_of_banner');
 
           <!-- .elevator-banner -->
           <!-- /ca-pub-8914899523938848/New_Statesman/Unit4 -->
+
       <div id='Unit4' class="secondary-content-box desktop-banner mpu" style="background-color: #fff; border-left: 0.1em solid rgba(0, 0, 0, 0.05); border-right: 0.1em solid rgba(0, 0, 0, 0.05);">
         <script type='text/javascript'>
           googletag.cmd.push(function() { googletag.display('Unit4'); });
