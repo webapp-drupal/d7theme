@@ -85,7 +85,7 @@
 };
 
 ?>
-<?php if(!user_is_logged_in()): ?>
+<?php if(!$logged_in): ?>
 <div id='div-out_of_banner'>
   <script type='text/javascript'>
 googletag.display('div-out_of_banner');
