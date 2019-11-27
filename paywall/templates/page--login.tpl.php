@@ -1,0 +1,2 @@
+<ev-login auth-scheme-name="default" forgot-password-service="edit_password" show-social="true" social-style="icons" social-networks="['facebook', 'google']" remember-me="true" title="Login" show-labels="false" show-header="false" show-container="false"  auto-populate="true" submitbtn-caption="Log In" override-translation-key="ev.login"></ev-login>
+<ev-registration show-labels="false" id="registration" auth-scheme-name="default" recaptcha="false" service-name="default" title="register" submitbtn-caption="Create Account"></ev-registration>

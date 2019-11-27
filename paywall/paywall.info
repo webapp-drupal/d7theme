@@ -1,0 +1,8 @@
+name = Paywall
+description = Paywall system with Evolok
+core = 7.x
+package = My Modules 
+stylesheets[all][] = assets/css/ev-custom.css
+
+; NEW LINE
+configure = admin/config/paywall/settings

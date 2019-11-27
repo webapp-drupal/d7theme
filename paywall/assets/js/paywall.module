@@ -1,0 +1,776 @@
+<?php
+
+/**
+ * @file
+ * A module that implements evolok paywall system
+ */
+
+/**
+ * Implements hook_help().
+ *
+ * Displays help and module information.
+ *
+ * @param path
+ *   Which path of the site we're using to display help
+ * @param arg
+ *   Array that holds the current path as returned from arg() function
+ */
+
+require "evolok-lib/evolok.php";
+
+function paywall_help($path, $arg) {
+  switch ($path) {
+    case "admin/help#evolok":
+      return t("Evolok Paywall Integration");
+      break;
+  }
+}
+
+function paywall_preprocess_html(&$variables) {
+  if(  !path_is_admin(current_path()) && !drupal_is_front_page() ){
+    $node = menu_get_object();
+
+    if( isset($node) && $node->type == 'paywall' ){
+      //remove indexing from bots for subs page
+      $list = ['subscription-renew', 'subscription-discount', 'subscription-discount-us', '12412book', 'renew20', 'subscribeCLF', 'renew'];
+      $page_name = drupal_get_path_alias();
+         
+      if ( in_array( $page_name, $list) ) {
+        $metag = array(
+          '#tag' => 'meta',
+          '#attributes' => array(
+             'name' => 'robots',
+             'content' => 'nofollow, noindex',
+          ),
+        );
+        drupal_add_html_head($metag, 'metatag_robots_0');
+      }
+
+      $variables['classes_array'][] = drupal_clean_css_identifier($page_name);
+    }
+  }
+
+}
+
+function custom_paywall_template_selector( &$vars, $template, $loc = null ){
+  $node_id = $vars['node']->nid;
+  if( $loc ){
+    $ev_paywall_module_path = drupal_get_path('module', 'paywall') . '/templates/' . $loc . $template;
+  }else{
+    $ev_paywall_module_path = drupal_get_path('module', 'paywall') . '/templates/' . $template;
+  }
+          // var_dump($vars['page']);
+  // var_dump($ev_paywall_module_path);
+  ob_start();
+  include $ev_paywall_module_path;
+  $template_content = ob_get_clean();
+  $vars['page']['content']['system_main']['nodes'][$node_id]['body'][0]['#markup'] = $template_content;
+}
+
+function paywall_preprocess_page(&$vars) {
+  if(  !path_is_admin(current_path()) && !drupal_is_front_page() && isset($vars['node']) ){
+    $node = $vars['node'];
+    $node_id = $node->nid;
+    $ev_page_name = drupal_get_path_alias('node/' . $node_id);
+
+    /*** check if template is selected for paywall page ***/
+    if( $node->type == "paywall" ){
+
+      if(isset(field_get_items('node', $node, 'field_paywall_template')[0]['value'])) {  
+           $template_type = field_get_items('node', $node, 'field_paywall_template')[0]['value'];
+        if( $template_type == "default" ){
+          custom_paywall_template_selector( $vars, 'page--ev_default.tpl.php', 'inc/');
+        }elseif( $template_type == "template1" ){
+          custom_paywall_template_selector( $vars, 'page--ev_template1.tpl.php', 'inc/');
+        }elseif( $template_type == "template2" ){
+          custom_paywall_template_selector( $vars, 'page--ev_template2.tpl.php', 'inc/');
+        }
+        return;
+      }
+    } 
+
+    if( $ev_page_name == 'my-account' ){
+        custom_paywall_template_selector( $vars, 'page--my_account.tpl.php'); 
+
+    }elseif( $ev_page_name == variable_get('paywall_main_subscribe_page') ){
+      if( variable_get('paywall_main_subscribe_page_christmas') == '1' ){
+        custom_paywall_template_selector( $vars, 'page--ev_subscribe-christmas.tpl.php');
+
+      }else{
+        custom_paywall_template_selector( $vars, 'page--ev_subscribe.tpl.php');
+
+      }
+    }elseif( $ev_page_name == 'product-profile' ){
+      custom_paywall_template_selector( $vars, 'page--product-profile.tpl.php');
+
+    }elseif( $ev_page_name == 'product-summary-payment' ){
+      custom_paywall_template_selector( $vars, 'page--product-summary-payment.tpl.php');
+
+    }elseif( $ev_page_name == 'login' ){
+      custom_paywall_template_selector( $vars, 'page--login.tpl.php');
+
+    }elseif( $ev_page_name == 'reset-password' ){
+      custom_paywall_template_selector( $vars, 'page--ev_password_reset.tpl.php');
+      
+	   // $logout = Evolok::ev_logout();
+       // echo '<pre>' . print_r($logout, true) . '</pre>';
+      // echo '<pre>' . print_r($_SESSION["ev_user"], true) . '</pre>';
+	  // echo "Paywall logout";
+	  /*
+      if( !isset($_SESSION["ev_user"]) ){
+         $ev_resp = Evolok::ev_login( array('email' => 'hiran.rai@progressivemediagroup.com', 'password' => 'TeSt123') );
+         // echo '<pre>' . print_r($ev_resp, true) . '</pre>';
+      }
+
+      echo '<pre>' . print_r($_SESSION["ev_user"], true) . '</pre>';
+      // echo '<pre>' . print_r($ev_resp, true) . '</pre>';
+
+      // $logout = Evolok::ev_logout();
+      // echo '<pre>' . print_r($logout, true) . '</pre>';
+      echo '<pre>' . print_r($_SESSION["ev_user"], true) . '</pre>';
+
+      $data = array(
+                "articleId" => '312009',
+                "category"  => '8268,8274',
+                "tag"       => '',
+                // "ev_ss"     => $_SESSION['ev_ss']
+                );
+      var_dump($data);
+
+      $user = Evolok::ev_get_user_profile();
+      // echo '<pre>' . print_r($user, true) . '</pre>';
+
+      $auth = Evolok::ev_authorize( $data );
+      echo '<pre>' . print_r($auth, true) . '</pre>';
+      */
+    }elseif( $ev_page_name == 'activate' ){
+      custom_paywall_template_selector( $vars, 'page--ev_activate.tpl.php');
+    }elseif( $ev_page_name == 'thanks-you' || $ev_page_name == 'thank-you-for-supporting-the-new-statesman' ){
+      custom_paywall_template_selector( $vars, 'page--ev_thank_you.tpl.php');
+      
+    }elseif( $ev_page_name == variable_get('paywall_main_student_subscribe_page') ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe_student.tpl.php');
+
+    }elseif( $ev_page_name == variable_get('paywall_main_subscribe_page_us') ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe-america.tpl.php');
+
+    }elseif( $ev_page_name == 'warwickpolsoc' ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe_student_warwick.tpl.php');
+      
+    }elseif( $ev_page_name == variable_get('paywall_main_student_subscribe_page_us') ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe_student.tpl.php');
+      
+    }elseif( $ev_page_name == 'subscription-renew' ){
+      custom_paywall_template_selector( $vars, 'page--ev_renew.tpl.php');
+
+    }elseif( $ev_page_name == 'preference/subscription' ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe_preference.tpl.php');
+
+    }elseif( $ev_page_name == 'subscription-discount' ){
+      custom_paywall_template_selector( $vars, 'page--ev_discount.tpl.php');
+
+    }elseif( $ev_page_name == 'subscription-discount-us' ){
+      custom_paywall_template_selector( $vars, 'page--ev_discount-america.tpl.php');
+
+    }elseif( $ev_page_name == 'subscription-gift' ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe-gift.tpl.php');
+
+    }elseif( $ev_page_name == '12412book' ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe-book.tpl.php');
+
+    }elseif( $ev_page_name == 'renew20' ){
+      custom_paywall_template_selector( $vars, 'page--ev_renew20.tpl.php');
+
+    }elseif( $ev_page_name == 'subscribeCLF' ){
+      if( variable_get('paywall_main_subscribe_page_christmas') == '1' ){
+        custom_paywall_template_selector( $vars, 'page--ev_subscribeCLF-christmas.tpl.php');
+
+      }else{
+        custom_paywall_template_selector( $vars, 'page--ev_subscribeCLF.tpl.php');
+
+      }
+      
+    }elseif( $ev_page_name == 'renew' ){
+      custom_paywall_template_selector( $vars, 'page--ev_renew--new.tpl.php');
+
+    }elseif( $ev_page_name == '12412insert' ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe-insert.tpl.php');
+      
+    }elseif( $ev_page_name == 'subscribeCLF12' ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribeCLF12.tpl.php');
+
+    }elseif( $ev_page_name == 'renewUK' ){
+      custom_paywall_template_selector( $vars, 'page--ev_renewUK.tpl.php');
+      
+    }elseif( $ev_page_name == 'sturenewUK' ){
+      custom_paywall_template_selector( $vars, 'page--ev_ sturenew.tpl.php');
+
+    }elseif( $ev_page_name == 'MA19insert' ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe-ma19insert.tpl.php');
+
+    }elseif( $ev_page_name == 'morningcallsub' ){
+      custom_paywall_template_selector( $vars, 'page--ev_morningcallsub.tpl.php');
+
+    }elseif( $ev_page_name == 'subscribe_sm' ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe_sm.tpl.php');
+
+    }elseif( $ev_page_name == 'subscribe12' ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe12.tpl.php');
+
+    }elseif( $ev_page_name == 'new719' ){
+      custom_paywall_template_selector( $vars, 'page--ev_subscribe_new719.tpl.php');
+
+    }elseif( $ev_page_name == 'student2019' ){
+      custom_paywall_template_selector( $vars, 'page--ev_student2019.tpl.php');
+
+    }elseif( $ev_page_name == 'FreeTrial' ){      
+      custom_paywall_template_selector( $vars, 'page--ev_FreeTrial.tpl.php');
+
+    }
+    else{
+      
+      
+/*
+      $cats = $node->field_categories['und'];
+      if( $cats ){
+        $cats_array = array_column($cats, 'tid');
+        $cats_array_str = implode(",",$cats_array);
+      }
+*/
+
+      // $ev_resp = paywall_evolok_call( "https://cmp.uat.evolok.net/acd/api/3.0/authorize/json?articleId=$node_id&category=$cats_array_str&tags=" );
+
+      // $ev_resp_obj = json_decode($ev_resp);
+      // var_dump( $ev_resp_obj );
+
+
+      // $ev_auth = Evolok::ev_authorize( 0, '?articleId=312005&category=8268%2C8275%2C8274&tags=' );
+      // var_dump('auth: ' . $ev_auth);
+
+      // if( $ev_resp_obj->result != 'ALLOW_ACCESS' ){
+      //   $msg = 'Please subscribe';
+      //   $vars['page']['content']['system_main']['nodes'][$node_id]['body'][0]['#markup'] = $msg;
+      // }
+
+
+
+      // if the category paywalled
+      // if( !empty( array_intersect($cats_array_str,$cats_with_paywall) )  ){
+
+      // }
+
+
+      // var_dump( $vars );
+      // taxonomy_node_get_terms_by_vocabulary($node_id, $vid, $key = 'tid')
+      // echo '<pre>' . print_r($node->field_tags, true) . '</pre>';
+    }
+
+  }
+
+}
+
+function paywall_evolok_libs(){
+  $module_path = drupal_get_path( 'module', 'paywall' );
+  $module_path_js = $module_path . '/assets/js';
+  $module_path_css = $module_path . '/assets/css';
+
+  $libs = '<!--[if gt IE 9 | !IE ]><!-->
+            <link href="/' . $module_path_css . '/ev-widgets.min.css" rel="stylesheet">
+            <link href="/' . $module_path_css . '/prefixed-bootstrap.css" rel="stylesheet">
+            <script type="text/javascript" src="/' . $module_path_js . '/ev-dab.min.js?ver=1.2.0"></script>
+            <script type="text/javascript" src="/' . $module_path_js . '/ev-widgets.min.js?ver=3.5.51.2"></script>
+            <script type="text/javascript" src="/' . $module_path_js . '/ev-em.min.js?ver=3.2.15"></script>
+          <![endif]-->';
+
+  return $libs;
+
+}
+
+
+function paywall_init(){
+  $catpcha_key = !empty(variable_get("paywall_other_settings_captcha_site_key")) ? variable_get("paywall_other_settings_captcha_site_key") : "6LcHrpAUAAAAAGAkDcosec3_d7Ssqggm8j9bz5e2";
+  
+  $init = '
+      <script>
+        EV.Core.init({
+            serviceName: "default",
+            realmName: "default_realm",
+            icDomain: "' . variable_get("paywall_main_icDomain") . '",
+            recaptchaSiteKey: "' . $catpcha_key . '"
+        });
+
+        EV.Translate.addTranslationTable("en", {
+          "ev.widgets.errors.attribute_validation_failed": "Details are invalid. Please enter valid details",
+          "ev.widgets.errors.general_attributes": "Details are invalid. Please enter valid details",
+          "ev.widgets.errors.general_attribute": "Details are invalid. Please enter valid details",          
+          "ev.widgets.errors.forgot_password_success": "Password reset email sent",
+          "ev.widgets.errors.duplicate_user_profile": "Email already exits! Please use different email for signup",        
+          "ev.widgets.errors.undefined_order_id": "The order has not been created. Please enter valid billing address and delivery address.",  
+          "ev.widgets.errors.invalid_form": "Please enter valid profile details.",  
+          "ev.widgets.errors.identifiers_invalid": "The password you have entered is incorrect. Please re-enter your password, or click the forgot password button below to reset it.",
+          "ev.widgets.errors.identifier_value_empty": "Please enter a valid email address.",
+          "ev.widgets.errors.validators_value_empty": "Please enter a valid password.",
+          "ev.widgets.productProfile.submit" : "Click To Proceed",
+          "ev.widgets.productSelection.orderType.GIFT": "Tick this box if this is a gift",
+          "ev.widgets.errors.not_robot": "Please tick the captcha box below"
+
+        });
+
+      EV.Translate.setActiveLanguage("en", true);
+
+        EV.Widgets = {};
+        EV.Widgets.Display = {};
+
+        EV.Em.init({
+            url: "' . variable_get("paywall_em_url") . '",
+            sidCookieDomain: "' . variable_get("paywall_em_sidCookieDomain") . '",
+            meterHD: false
+        });
+
+        EV.Social.init({
+            icDomain: "' . variable_get("paywall_social_icDomain") . '",
+            serviceName: "default",
+            realmName: "default_realm",
+            redirectUri: "/my-account",
+            socialAttributeMapping: {
+                "email_address": "email",
+                "first_name": "firstName",
+                "last_name": "lastName"
+            },
+            socialKeys: {
+                facebook   : ' . ((!empty( variable_get("paywall_social_facebook") ) )? "\"" . variable_get("paywall_social_facebook") . "\"," : "\"key here\"," ) . '
+                google   : ' . ((!empty( variable_get("paywall_social_google") ) )? "\"" . variable_get("paywall_social_google") . "\"," : "\"key here\"," ) . '
+            }
+        });
+
+        EV.Event.init();
+
+        EV.PM.init({
+            pmDomain: "' . variable_get("paywall_PM_pmDomain") . '",
+            version: 2,
+            stripeKey: "' . variable_get("paywall_PM_stripeKey") . '",
+            skipSummary: false,
+            skipProfile: false,
+            skipValidation: false,
+            skipSessionCreation: false,
+            skipLogin: false
+        });
+
+
+        var TNS_Data = {};
+
+        TNS_Data.countries = [];
+
+        EV.Widgets.Display = {
+                "newsletterSpecialOffers": {
+                    "type": "checkbox",
+                    "values": {"true": {"caption": "' . variable_get("paywall_other_settings_marketing_newsletter_special") . '", "id": "true"} }
+                },
+                "newsletterWeeklyHighlights": {
+                    "type": "checkbox",
+                    "values": {"true": {"caption": "' . variable_get("paywall_other_settings_marketing_newsletter_weekly") . '", "id": "true"} }
+                },
+                "NewStatesman_The_Morning_Call_by_Stephen_Bush": {
+                    "type": "checkbox",
+                    "values": {"true": {"caption": "' . variable_get("paywall_other_settings_marketing_newsletter_morning_call") . '", "id": "true"} }
+                },
+                "newsletterCulture": {
+                    "type": "checkbox",
+                    "values": {"true": {"caption": "' . variable_get('paywall_other_settings_marketing_newsletter_culture') . '", "id": "true"} }
+                },
+                "delivery_address": {
+                    "type": "label",
+                    "values": [
+                      { "caption": "Delivery Address", "value": "Delivery Address" }
+                    ]
+                }
+            };
+
+        TNS_Data.auth = {};
+
+        // EV.Dab.init();
+
+      </script>
+<!--- Evlolok init ENDS -->
+';
+  return $init;
+}
+
+function paywall_ev_get_html($elem){
+  $output = '';
+  if($elem == 'ev-product-profile'){
+    if($_GET['productName'] == "Free_Trial_digital_"){
+      $output .= '<ev-product-profile use-billing-option="false" show-labels="true" show-header="false" sort-country="false"></ev-product-profile>';
+
+    }else{
+      $output .= '<ev-product-profile use-billing-option="true" show-labels="true" show-header="false" sort-country="false"></ev-product-profile>';
+
+    }
+  }
+  return $output;
+}
+
+function paywall_ev_get_modal($name){
+
+  $modal = '';
+  if( $name == "ev-login" ){
+    $modal = '<ev-login ev-ready="login_loaded" auth-scheme-name="default" forgot-password-service="edit_password" show-social="true" recaptcha="false" social-style="icons" social-networks="[\'facebook\', \'google\']" remember-me="true" title="Login" show-labels="false" show-header="false" show-container="false"  auto-populate="true" submitbtn-caption="Log In" override-translation-key="ev.login">
+    </ev-login>';
+  }elseif( $name =="ev-registration" ){
+    $environment = ( $environment == "live" || $environment == "dev" ) ? "true" : "false"; 
+    // $modal = '<ev-registration show-labels="false" show-header="false" id="registration" auth-scheme-name="default" recaptcha="false" service-name="default" title="register" submitbtn-caption="Create Account" auto-login="true" show-social="true" social-style="icons" social-networks="[\'facebook\', \'google\']" hidden-attributes="{\'registration\': \'true\'}"></ev-registration><div class="tns-pp ng-scope">By registering, I Agree to the <a href="/terms/" target="_blank">Terms of Service</a> and <a href="/privacy-policy/" target="_blank">Privacy Policy</a></div>'; 
+    $modal = '<ev-registration show-labels="false" show-header="false" id="registration" auth-scheme-name="default" recaptcha="true" service-name="default" title="register" submitbtn-caption="Create Account" auto-login="true" show-social="true" social-style="icons" social-networks="[\'facebook\', \'google\']" hidden-attributes="{\'registration\': \'true\'}"></ev-registration><div class="tns-pp ng-scope">By registering, I Agree to the <a href="/terms/" target="_blank">Terms of Service</a> and <a href="/privacy-policy/" target="_blank">Privacy Policy</a></div>'; 
+    //$modal = '<ev-registration show-labels="false" id="registration" auth-scheme-name="default" recaptcha="false" title="register" submitbtn-caption="Create Account" auto-login="true" show-social="true" social-style="icons" social-networks="[\'facebook\', \'google\']"></ev-registration>'; 
+	// <ev-login auth-scheme-name="default" forgot-password-service="edit_password" show-social="true" social-style="icons" social-networks="['facebook', 'google']" remember-me="true" title="Login" show-labels="false" show-header="false" show-container="false" auto-populate="true" submitbtn-caption="Log In" override-translation-key="ev.login" class="ng-isolate-scope"><div id="login-flip" class="flip" ng-style="isHorizontal &amp;&amp; {'min-width':'0'}" style="min-width: 0px;"><div id="login-flip-front" ng-class="flippedFrontStyle" ng-style="isHorizontal &amp;&amp; {'min-width':'0'}" class="flip flip-front" style="min-width: 0px;">
+  }elseif( $name == "ev-registration-subs" ){
+    if($_GET['productName'] == "Free_Trial_digital_"){
+      $modal = '<ev-registration show-labels="false" name="freetrail_registration" id="registration" auth-scheme-name="default" recaptcha="true" service-name="freetrail_registration" title="register" submitbtn-caption="Create Account" auto-login="true" show-header="false" hidden-attributes="{\'registration\': \'true\'}"></ev-registration><div class="tns-pp ng-scope">By registering, I Agree to the <a href="/terms/" target="_blank">Terms of Service</a> and <a href="/privacy-policy/" target="_blank">Privacy Policy</a></div>';
+    }else{
+      $modal = '<ev-registration show-labels="false" name="register_subs_page" id="registration" auth-scheme-name="default" recaptcha="true" service-name="register_subs_page" title="register" submitbtn-caption="Create Account" auto-login="true" show-header="false" hidden-attributes="{\'registration\': \'true\'}"></ev-registration><div class="tns-pp ng-scope">By registering, I Agree to the <a href="/terms/" target="_blank">Terms of Service</a> and <a href="/privacy-policy/" target="_blank">Privacy Policy</a></div>';
+      
+    }
+    
+  }else{
+    $modal = "testing";
+  }
+
+  return $modal;
+
+}
+
+
+function paywall_ev_modals(){
+  //forgot-password-service="edit_password"
+
+  $private_mode_html = '<div class="container-fluid">
+                          <div class="row">
+                              <div class="modal-header text-center">
+                                  <h1>NewStatesman</h1>
+                              </div>
+                          </div>
+                          <div class="row">
+                              <div class="col-md-4 modal-content">
+                                      <h2 id="bannimg" class="text-center"><img src="/' . drupal_get_path('module', 'paywall') . '/assets/img/private-modal.png' . '" alt="Subscribe from just £1 per week"></h2>
+                                      <div class="text-center">
+                                          <h4 class="text-center">You are browsing in private mode.</h4>
+                                          <p class="modal-message">To enjoy all the benefits of our website</p>
+                                          <button name="login" class="tns-goto-login" data-context="paywall">LOG IN</button>
+                                          <span class="modal-options">or</span>
+                                          <button name="register" class="tns-goto-register register" data-context="Login">Create an Account</button>
+                                      </div>
+                              </div>
+                          </div>
+                      </div>';
+
+  $html = '';
+  $html = '<div class="tns-modal-wrapper">';
+
+    $html .= '<div class="tns-modal tns-modal--login">';
+      $html .= '<a><span class="ev-nslogo"><img src="https://www.newstatesman.com/sites/default/files/styles/large/public/ns-ga.jpeg?itok=soqxWQNh"></span></a><a><span class="tns-ev-close tns-close">&times;</span></a>' . paywall_ev_get_modal("ev-login") .
+            '<span class="tns-right">Don\'t have an account? <a name="register" class="tns-goto-register" data-context="Login">Sign up</a></span>';
+    $html .= '</div>';
+
+    $html .= '<div class="tns-modal tns-modal--register">';
+      $html .= '<a><span class="ev-nslogo"><img src="https://www.newstatesman.com/sites/default/files/styles/large/public/ns-ga.jpeg?itok=soqxWQNh"></span></a><a><span class="tns-ev-close tns-close">&times;</span></a>' . paywall_ev_get_modal("ev-registration") .
+            '<span class="tns-right">Already a member? <a name="login" class="tns-goto-login" data-context="Register">Log in</a></span>';
+    $html .= '</div>';
+
+    $html .= '<div class="tns-modal tns-modal--paywall">';
+      $html .= '<a><span class="tns-ev-close tns-close">&times;</span></a><ev-paywall modal="false"></ev-paywall>';
+    $html .= '</div>';
+
+
+    $html .= '<div class="tns-modal tns-modal--paywallNotifier">';
+      $html .= '<a><span class="tns-ev-close tns-close">&times;</span></a><ev-paywall-notifier modal="false"></ev-paywall-notifier>';
+    $html .= '</div>';
+
+    $html .= '<div name="sociallogin" class="tns-modal tns-modal--sociallogin">';
+      $html .= '<a><span class="tns-ev-close tns-close">&times;</span></a><ev-social-registration id="socialRegistration" auth-scheme-name="default" service-name="registration" title="Create an Account"
+                modal-keyboard="true" modal-backdrop="true" auto-populate="true" auto-register="false"
+                show-error-msgs="true" submitBtn-caption="Create Account" cancel-anchor-caption="" show-labels="false">
+            </ev-social-registration>';
+    $html .= '</div>';
+
+    $html .= '<div class="tns-modal tns-modal--privateMode">';
+      $html .= '<a><span class="tns-ev-close tns-close">&times;</span></a>' . $private_mode_html;
+    $html .= '</div>';
+
+    // $html .= '<div class="tns-modal tns-modal--forgotPassword">';
+    //   $html .= '<a href="#"><span class="tns-ev-close tns-close">&times;</span></a><ev-forgot-password auth-scheme-name="default" service-name="edit_password" show-labels="false" show-header="false" show-container="false" class="ng-isolate-scope"></ev-forgot-password>';
+    // $html .= '</div>';
+
+  $html .= '</div>';
+
+/*
+  switch ($delta){
+    case 'login':
+      $html = '<a href="#"><span class="tns-ev-close tns-close">&times;</span></a><ev-login show-social="true" social-networks="[\'facebook\', \'google\']" title="Login" auth-scheme-name="default"  auto-populate="true" submitbtn-caption="Log In"></ev-login>';
+      break;
+    case 'register':
+      $html = '<a href="#"><span class="tns-ev-close tns-close">&times;</span></a><ev-registration show-labels="false" id="registration" auth-scheme-name="default" recaptcha="false" service-name="default" title="register" submitbtn-caption="Create Account"></ev-registration>';
+      break;
+    case 'paywall':
+      $html = '<a href="https://hiran-2-new-statesman.pantheonsite.io/" class="tns-close">X</a><ev-paywall modal="false">' .
+
+            '</ev-paywall>';
+      break;
+    default:
+      $html = '';
+  }
+*/
+  return $html;
+}
+
+
+/**
+ * Custom content function.
+ *
+ * Set beginning and end dates, retrieve posts from database
+ * saved in that time period.
+ *
+ * @return
+ *   A result set of the targeted posts.
+ */
+function paywall_block_view($delta = '') {
+  // switch ($delta) {
+  //   case 'current_posts':
+  //     $block['subject'] = t('Current posts');
+
+  // <div style="width: 640px">
+        //   <ev-edit-profile non-editable="[\'email_address\']" title="Edit Profile" service-name="manage_profile"></ev-edit-profile>
+        // </div>
+  /*
+  <!-- <ev-grant-list id="grant-invite-list"
+               title="Grant Invite list"
+               show-header="true">
+        </ev-grant-list>
+        <ev-product-selection id="product-selection"
+                              group-name="default"
+                              title="Product Selection Group"
+                              show-header="true">
+        </ev-product-selection> -->
+  */
+
+        /*
+          <div style="display:none;">
+      <ev-login ev-modal modal-init="false" id="login" service-name="login" title="Login" auth-scheme-name="default"></ev-login>
+      <ev-registration ev-modal modal-init="false" show-cancel="false" show-labels="false" id="registration" auth-scheme-name="default" recaptcha="false" service-name="registration"></ev-registration>
+      </div>
+
+        */
+
+  $block = '
+  <ev-profile ev-ready="event_to_listen" profile="profile" style="float: right;">
+    <ev-profile-when state="available">
+      <div class="tns-checking-profile">
+        <a href="/my-account" class="navLoggedIn">My Account</a> |
+        <a class="navLoggedIn" onclick="javascript:EV.Core.UI.logout();">Log out</a>
+      </div>
+    </ev-profile-when>
+    <ev-profile-when state="not-loggedIn">
+
+      <button name="login" class="tns-btn tns-login" >Login</button> | <button name="register" class="tns-btn tns-register">Register</button>
+    ';
+
+
+  //  }
+  switch( $delta ){
+    case 'ev-paywall':
+          // $block .= "<ev-paywall></ev-paywall>";
+          break;
+    default:
+      $block .= "";
+  }
+
+  $block = '<button name="login" class="tns-btn tns-login" >Login</button>  <button name="register" class="tns-btn tns-register">Register</button>';
+
+  // $block .= '</ev-profile-when></ev-profile>';
+   return $block;
+}
+
+function paywall_evo_auth_func_check(){
+  $content = '<script type="text/javascript">
+                (function () {
+
+                  if ( typeof window.CustomEvent === "function" ) return false;
+
+                  function CustomEvent ( event, params ) {
+                    params = params || { bubbles: false, cancelable: false, detail: undefined };
+                    var evt = document.createEvent( "CustomEvent" );
+                    evt.initCustomEvent( event, params.bubbles, params.cancelable, params.detail );
+                    return evt;
+                   }
+
+                  CustomEvent.prototype = window.Event.prototype;
+
+                  window.CustomEvent = CustomEvent;
+                })();
+
+                var TNS_Data = {};
+
+                // var TNS_ev_ready;
+                // var ev_is_ready;
+
+                TNS_Data.auth = {};
+                TNS_Data.auth.ev_queue = [];
+
+                function custom_ready_event(params){
+                  const event = new CustomEvent("TNS_ev_ready", {
+                    detail : {
+                      params : params
+                    }
+                  });
+
+                  return event;
+                }
+
+                TNS_Data.auth.ev_ready_func = function(e){
+                  var params = e.detail.params;
+                    console.log("evolok: "  + params);
+                    // var dfd = $.Deferred();
+                    // if(){
+                      EV.Em.authorize(params, TNS_Data.auth.handleMeteringSuccess, TNS_Data.auth.handleMeteringError);
+                    // }
+                    // dfd.ressolve();
+                    // return dfd;
+                }
+
+                TNS_Data.auth.ev_emit = function( params ){
+                  // console.log(TNS_Data.param_init);
+                  // if( typeof TNS_Data.param_init === "undefined" ){
+                  //   TNS_Data.param_init = params;
+                  //   TNS_Data.auth.ev_ready_event = custom_ready_event( TNS_Data.param_init );
+                  //   console.log("evolok3 "  + params);
+                  //   return;
+                  // }
+
+                  if( typeof TNS_Data.auth.handleMeteringSuccess === "undefined" || typeof TNS_Data.auth.handleMeteringError === "undefined" ){
+                    console.log("evolok5 "  + params);
+                    TNS_Data.auth.ev_ready_event = custom_ready_event( TNS_Data.param_init );
+                    var param = params;
+                    (TNS_Data.auth.ev_queue).push( param );
+                    // Array.prototype.push.apply(TNS_Data.auth.ev_queue, [param]);
+                  }else{
+                    console.log("evolok4 "  + params);
+                    TNS_Data.auth.ev_ready_event.detail.params = params;
+
+                    // window.addEventListener("TNS_ev_ready", TNS_Data.auth.ev_ready_func)
+                    window.dispatchEvent( TNS_Data.auth.ev_ready_event );
+                  }
+                }
+
+              </script>';
+  return $content;
+}
+
+function paywall_evo_authorize_infinite( $evo_params ){
+  $content = '<script type="text/javascript">
+                // alert("loaded");
+                var params = \'{"articleId": "' . $evo_params["articleId"] . '", "category": "' . $evo_params["category"] . '", "tags": "' . $evo_params["tags"] . '", "author": "' . $evo_params["authors"] . '", "section": "' . $evo_params["section"] . '"}\';
+                TNS_Data.articleId = ' . $evo_params["articleId"] . ';
+                // articleId = ' . $evo_params["articleId"] . ';
+                // console.log("req: "+ params);
+                TNS_Data.auth.ev_emit( params );
+                // console.log(TNS_Data.auth.ev_queue);
+
+        </script>';
+  return $content;
+}
+
+function paywall_evo_authorize( $evo_params ){
+  $content = '<script type="text/javascript">
+                // alert("loaded");
+                var params_obj = {"articleId": "' . $evo_params["articleId"] . '", "category": "' . $evo_params["category"] . '", "tags": "' . $evo_params["tags"] . '", "author": "' . $evo_params["authors"] . '", "section": "' . $evo_params["section"] . '", "site": "' . $evo_params["site"] . '", "notifier": "' . $evo_params["notifier"] . '"};
+
+                TNS_Data.articleId = ' . $evo_params["articleId"] . ';
+                // articleId = ' . $evo_params["articleId"] . ';
+                // console.log("req: "+ params);
+                // TNS_Data.auth.ev_emit( params );
+                // console.log(TNS_Data.auth.ev_queue);
+                // console.log(TNS_Data.auth.handleMeteringSuccess); 
+
+                TNS_Data.auth.init(params_obj);            
+
+              </script>';
+  return $content;
+}
+
+function paywall_evo_TNS_Data( $evo_article_id ){
+  $content = '<script type="text/javascript">
+        TNS_Data.articleId = '. $evo_article_id . ';
+        </script>';
+  return $content;
+}
+
+function paywall_evo_custom_js(){
+  $module_path = drupal_get_path( 'module', 'paywall' );
+  $module_path_js = $module_path . '/assets/js';
+  
+
+  $scripts =  '<script type="text/javascript" src="/' . $module_path_js . '/ev-custom.min.js?v=1.7.1"></script>';
+  $scripts .=  '<script type="text/javascript" src="/' . $module_path_js . '/ev-ui.js"></script>';
+  return $scripts;
+}
+
+function paywall_amp_libs(){
+  $libs = '<script async custom-element="amp-access" src="https://cdn.ampproject.org/v0/amp-access-0.1.js"></script>';
+  // $libs .='<script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>';
+  return $libs;
+}
+
+
+function paywall_menu(){
+// First, create the area for your menu items on the config page.
+$items['admin/config/paywall'] = array(
+        'title' => 'Paywall', //This is the area title (Configuration, People etc etc)
+        'description' => 'paywall settings.', // Like any other menu item
+        'position' => 'right', //Wether it is on the right or the left of the config page
+        'weight' => -15,
+        'page callback' => 'system_admin_menu_block_page', //DONT CHANGE THIS!
+        'access arguments' => array('administer site configuration'), // Permission needed to view this area
+        'file' => 'system.admin.inc', //DONT CHANGE THIS!
+        'file path' => drupal_get_path('module', 'system'), //DONT CHANGE THIS!
+    );
+
+$items['admin/config/paywall/other_settings'] = array(
+        'title' => 'Other Settings',
+        'description' => 'Paywall Other Settings.',
+        'page callback' => 'drupal_get_form', //in this case we're calling a form
+        'page arguments' => array('paywall_form_other_settings'), //this is the form function
+        'access arguments' => array('administer site configuration'), //permissions
+        'type' => MENU_NORMAL_ITEM, //menu type.
+      'file' => 'paywall.admin.inc',
+    );
+
+$items['admin/config/paywall/product_management_settings'] = array(
+        'title' => 'PM Settings',
+        'description' => 'Paywall Product Management Settings.',
+        'page callback' => 'drupal_get_form', //in this case we're calling a form
+        'page arguments' => array('paywall_form_pm'), //this is the form function
+        'access arguments' => array('administer site configuration'), //permissions
+        'type' => MENU_NORMAL_ITEM, //menu type.
+      'file' => 'paywall.admin.inc',
+    );
+$items['admin/config/paywall/america/product_management_settings'] = array(
+        'title' => 'PM America Settings',
+        'description' => 'Paywall Product Management Settings for America.',
+        'page callback' => 'drupal_get_form', //in this case we're calling a form
+        'page arguments' => array('paywall_form_pm_america'), //this is the form function
+        'access arguments' => array('administer site configuration'), //permissions
+        'type' => MENU_NORMAL_ITEM, //menu type.
+      'file' => 'paywall.admin.inc',
+    );
+
+$items['admin/config/paywall/settings'] = array(
+        'title' => 'Settings',
+        'description' => 'Paywall Settings.',
+        'page callback' => 'drupal_get_form', //in this case we're calling a form
+        'page arguments' => array('paywall_form'), //this is the form function
+        'access arguments' => array('administer site configuration'), //permissions
+        'type' => MENU_NORMAL_ITEM, //menu type.
+    	'file' => 'paywall.admin.inc',
+    );
+
+return $items;
+}
+
