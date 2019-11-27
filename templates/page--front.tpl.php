@@ -1,0 +1,327 @@
+<?php
+/**
+ * @file
+ * Default theme implementation to display a single Drupal page.
+ *
+ * Available variables:
+ *
+ * General utility variables:
+ * - $base_path: The base URL path of the Drupal installation. At the very
+ *   least, this will always default to /.
+ * - $directory: The directory the template is located in, e.g. modules/system
+ *   or themes/garland.
+ * - $is_front: TRUE if the current page is the front page.
+ * - $logged_in: TRUE if the user is registered and signed in.
+ * - $is_admin: TRUE if the user has permission to main-menu administration pages.
+ *
+ * Site identity:
+ * - $front_page: The URL of the front page. Use this instead of $base_path,
+ *   when linking to the front page. This includes the language domain or
+ *   prefix.
+ * - $logo: The path to the logo image, as defined in theme configuration.
+ * - $site_name: The name of the site, empty when display has been disabled
+ *   in theme settings.
+ * - $site_slogan: The slogan of the site, empty when display has been disabled
+ *   in theme settings.
+ *
+ * Navigation:
+ * - $main_menu (array): An array containing the Main menu links for the
+ *   site, if they have been configured.
+ * - $secondary_menu (array): An array containing the Secondary menu links for
+ *   the site, if they have been configured.
+ * - $breadcrumb: The breadcrumb trail for the current page.
+ *
+ * Page content (in order of occurrence in the default page.tpl.php):
+ * - $title_prefix (array): An array containing additional output populated by
+ *   modules, intended to be displayed in front of the main title tag that
+ *   appears in the template.
+ * - $title: The page title, for use in the actual HTML content.
+ * - $title_suffix (array): An array containing additional output populated by
+ *   modules, intended to be displayed after the main title tag that appears in
+ *   the template.
+ * - $messages: HTML for status and error messages. Should be displayed
+ *   prominently.
+ * - $tabs (array): Tabs linking to any sub-pages beneath the current page
+ *   (e.g., the view and edit tabs when displaying a node).
+ * - $action_links (array): Actions local to the page, such as 'Add menu' on the
+ *   menu administration interface.
+ * - $feed_icons: A string of all feed icons for the current page.
+ * - $node: The node object, if there is an automatically-loaded node
+ *   associated with the page, and the node ID is the second argument
+ *   in the page's path (e.g. node/12345 and node/12345/revisions, but not
+ *   comment/reply/12345).
+ *
+ * Regions:
+ * - $page['help']: Dynamic help text, mostly for admin pages.
+ * - $page['content']: The main content of the current page.
+ * - $page['sidebar_first']: Items for the first sidebar.
+ * - $page['sidebar_second']: Items for the second sidebar.
+ * - $page['header']: Items for the header region.
+ * - $page['footer']: Items for the footer region.
+ *
+ * @see template_preprocess()
+ * @see template_preprocess_page()
+ * @see template_process()
+ */
+?>
+<?php //if ($page['topnav']): ?>
+
+<?php if( function_exists('geolocation_redirect') ) geolocation_redirect(); ?>
+
+<div id='div-out_of_banner'>
+  <script type='text/javascript'>
+//googletag.display('div-out_of_banner');
+</script>
+</div>
+
+
+
+<!-- .top-leaderboard -->
+<?php include( path_to_theme() . '/includes/header.php' ); ?>
+
+ <?php print $messages; ?>
+       <main class="make_equal">
+		 <section class="home-news">
+          <div class="row">
+    <div class="large-8 columns pc ">
+		 <!--   <h2>News</h2> -->
+	   <?php if ($page['home_content_news']): ?>
+              <?php print render($page['home_content_news']); ?>
+            <?php endif; ?>
+	  </div></div></div>
+
+	<div class="large-4 columns sc sidebar_home
+
+  ">
+        <div class="secondary-content-box sc-article-list from-our-writers">
+            <?php print render($page['the_latest']); ?>
+	  </div>
+	   <div class="secondary-content-box mpu article-mpu-1">
+            <!-- /ca-pub-8914899523938848/New_Statesman/Unit2 -->
+            <?php if(! checkmobile()){ ?>
+             <div id='Unit2' class='sidebarad1'>
+                <script type='text/javascript'>
+                  googletag.cmd.push(function() { googletag.display('Unit2'); });
+                </script>
+              </div>
+            <?php }?>
+    </div>
+
+	   <?php if ($page['sidebar_second_trending']): ?>
+            <div class="secondary-content-box most-popular">
+              <h2 class="scb-heading">Most Popular</h2>
+              <?php print render($page['sidebar_second_trending']); ?>
+            </div>
+            <!-- .most-popular -->
+            <?php endif; ?>
+  <!-- .most-popular -->
+  	<?php print render($page['the_staggers']); ?>
+      <div class="secondary-content-box mpu article-mpu-2">
+          <?php if(! checkmobile()){ ?>
+          <div id='Unit3' class='sidebarad1'>
+            <script type='text/javascript'>
+              googletag.cmd.push(function() { googletag.display('Unit3'); });
+            </script>
+          </div>
+          <?php }?>
+      </div>
+
+      <div class="secondary-content-box desktop-banner brexit-tracker">
+        <!--Smartad # 4222: New Statesman Right Rail-->
+        <iframe WIDTH="300" HEIGHT="600" SCROLLING="NO" src="//www.dianomi.com/smartads.epl?id=4222"  style="width: 300px; height: 600px; border: none; overflow: hidden;"></iframe>
+    </div>
+
+	  <div class="secondary-content-box citymetric-ad">
+              <a href="https://www.citymetric.com"><img src="/sites/all/themes/creative-responsive-theme/images/CityMetric_banner.png" alt="CityMetric"></a>
+<style>.verdict-brexit-widget { height: 680px;}</style>
+		   </div>
+            <!-- .citymetric-ad -->
+      <div class="secondary-content-box mpu article-mpu-3">
+              <?php if(! checkmobile()){ ?>
+              <div id='Unit4' class='sidebarad1'>
+                <script type='text/javascript'>
+                  googletag.cmd.push(function() { googletag.display('Unit4'); });
+                </script>
+              </div>
+              <?php } ?>
+      </div>
+            <?php if ($page['sidebar_second_youmay']): ?>
+            <div class="secondary-content-box editors-pick"> <?php print render($page['sidebar_second_youmay']); ?> </div>
+            <?php endif; ?>
+            <?php if ($page['sidebar_second_podcast']): ?>
+            <div class="secondary-content-box podcast-box">
+                <h2 class="scb-heading">Podcasts</h2>
+                <iframe width="300" height="300" src="https://embed.acast.com/newstatesman" scrolling="no" frameborder="0" style="border:none;overflow:hidden;"></iframe>
+                <iframe width="300" height="300" src="https://embed.acast.com/srsly" scrolling="no" frameborder="0" style="border:none;overflow:hidden;"></iframe>
+                <div class="cta"><a href="/podcast/">View all podcasts</a></div>
+            </div>
+            <?php endif; ?>
+            <?php if ($page['sidebar_second']): ?>
+            <div class="secondary-content-box"><?php print render($page['sidebar_second']); ?></div>
+            <?php endif; ?>
+      </div>
+    </div>
+	  </section>
+	  <!-- .home-news -->
+  <section class="home-politics" style="background-image: url(<?php echo theme_get_setting('front_page_section_image_url', 'creative_responsive_theme'); ?>) !important;">
+    <div class="row">
+      <div class="large-8 columns pc">
+  <!--  <h2>Politics</h2>-->
+	   <?php if ($page['home_content_politics']): ?>
+              <?php print render($page['home_content_politics']); ?>
+            <?php endif; ?>
+</div>
+
+
+</section>
+
+	<!-- .home-politics -->
+
+  <section class="home-culture">
+    <div class="row">
+      <div class="large-8 columns pc">
+      <!--   <h2>Culture</h2>-->
+	   <?php if ($page['home_content_culture']): ?><?php print render($page['home_content_culture']); ?>
+            <?php endif; ?>
+
+			</div>
+		</div>
+	</section>
+	   <!-- .home-culture -->
+
+  <section class="home-science-tech">
+    <div class="row">
+      <div class="large-8 columns pc">
+   <!--
+ <h2>Science &amp; Tech</h2>-->
+	   <?php if ($page['home_content_scienceandtech']): ?>
+              <?php print render($page['home_content_scienceandtech']); ?>
+            <?php endif; ?>
+
+		  </div>
+
+    </div>
+  </section>
+   <!-- .home-science-tech -->
+
+<?php if ($page['home_content_5']): ?>
+  <section class="home-culture home-content-5">
+    <div class="row">
+      <div class="large-8 columns pc">
+   <!--
+ <h2>Science &amp; Tech</h2>-->
+
+
+              <?php print render($page['home_content_5']); ?>
+
+
+		  </div>
+    </div>
+  </section>
+<?php endif; ?>
+
+<?php if ($page['home_content_6']): ?>
+  <section class="home-science-tech home-content-6">
+    <div class="row">
+      <div class="large-8 columns pc">
+   <!--
+ <h2>Science &amp; Tech</h2>-->
+
+
+              <?php print render($page['home_content_6']); ?>
+
+
+		  </div>
+
+
+    </div>
+  </section>
+<?php endif; ?>
+
+
+
+
+
+    <div class="row">
+
+        <div class="large-8 newsletter_footer">
+            <div class="row">
+                <div class="large-9 columns">
+                    <img class="ns-small-logo" src="https://www.newstatesman.com/sites/default/files/ns-ga.jpeg">
+                    <span class="ns-signup-footer">Morning Call </span>
+                    <div class="ns-signup-copy">
+                      <h4>Get the Morning Call with Stephen Bush, free email newsletter.</h4>
+                     <div class="cta">
+						<a href="/morning-call-email-newsletter">Sign-up</a>
+					  </div>
+                    </div>
+                </div>
+            <!--    <div class="large-3 columns">
+                    <img src="https://www.newstatesman.com/sites/default/files/ns_stephen_bush_byline_drawing.jpg" alt="Stephen Bush">
+                </div>-->
+            </div>
+        </div>
+
+
+
+        <div class="ns_subscribe_footer large-8">
+          <div class="large-3 columns">
+            <a href="/ev-subscribe"><img class="nssfi" src="<?php echo theme_get_setting('front_page_section_footer_paywall_image'); ?>"></a>
+          </div>
+            <div class="large-9 columns">
+              <div class="subscription-header subscription-header-footer">
+                <h1><a href="/ev-subscribe">Enlightened thinking in dark times.</a></h1>
+                <p>Support 100 years of liberal and independent journalism and get the <span style="font-weight: bold;font-style: italic;">New Statesman</span> magazine before it hits the news-stand.</p>
+                <p><a href="/ev-subscribe">Subscribe for just £1 a week.</a></p>
+            </div>
+          </div>
+          </a>
+        </div>
+
+
+
+    </div>
+
+
+
+
+  </main>
+
+
+
+
+
+
+
+
+<section id="nsfooter">
+  <div class="row">
+    <div class="footerwrapper">
+      <div class="large-2 columns footerlogo">
+       <img src="https://newstatesman.com/sites/all/themes/creative-responsive-theme/images/newstatesman_logo@2x.png" alt="">
+      </div>
+      <div class="large-10 columns">
+        <div class="link-footer">
+        <?php print render($page['footer']) ?>
+        </div>
+      </div>
+    </div>
+    <div class="large-12">
+      <div class="sociallist">
+          <ul>
+            <li><a href="https://www.twitter.com/newstatesman"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
+            <li><a href="https://en-gb.facebook.com/NewStatesman/"><i class="fa fa-facebook" aria-hidden="true"></i></a></li>
+          </ul>
+        </div>
+      </div>
+  </div>
+</section>
+
+
+<footer class="site-footer site-footer-hidden">
+<p>&copy; New Statesman 1913 - <?php echo date("Y"); ?></p> <div class="toggle footer-links-toggle">About us</div>
+  <?php if ($page['footer']): ?>
+  <div id="foot"> <?php print render($page['footer']) ?> </div>
+   <?php endif; ?>
+</footer>
+

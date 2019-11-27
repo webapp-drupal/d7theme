@@ -1,0 +1,117 @@
+name = NS New design 2015
+description =NS New design 2015 is a responsive theme its perfect for all corporate and business websites
+core = 7.x
+
+engine = phptemplate
+stylesheets[all][] = style.css
+//stylesheets[all][] = media.css
+//stylesheets[all][] = styles/style.css
+//stylesheets[all][] = styles/lazy.css
+//stylesheets[all][] = styles/animate.css
+stylesheets[all][] = styles/style-america.css
+scripts[] = js/custom.js
+
+//scripts[] = js/jquery.scrolldepth.min.js
+//scripts[] = js/foundation.min.js
+
+
+regions[topnav]         = Top Nav
+regions[carouselevent]         = Nav bar Carousel event
+regions[mainnav]        = Main Nav
+regions[mainnav2]        = Main Nav 2
+regions[megamenu_subnav]        = Megamenu Sub Nav
+regions[pl_subnav]        = Politics Sub Nav
+regions[cl_subnav]        = Culture Sub Nav
+regions[wl_subnav]        = World Sub Nav
+regions[sl_subnav]        = scince Sub Nav
+regions[ev_subnav]        =  Event Sub Nav
+regions[megamenu_event]        = Megamenu Event
+regions[subnav]        = Sub Nav
+regions[filterby]      = Filter  By
+regions[search]        = Search
+regions[home_content_news]  =  Home Content News
+regions[home_content_politics]  =  Home Content Politics
+regions[home_content_culture]  =  Home Content Culture
+regions[home_content_scienceandtech]  =  Home Content Science and tech
+regions[home_content_5]  =  Home Content section 5
+regions[home_content_6]  =  Home Content section 6
+
+regions[home_featured_image_bg]  =  Featured image bg
+regions[home_featured_image]  =  Home featured Image
+regions[spot_featured_image]  =  Spotlight featured Image
+
+
+regions[the_latest]        =  The latest
+regions[newsletter]        =  Newsletter
+regions[newsletterweekly]        =  Newsletter Weekly
+regions[the_staggers]        =  The Staggers
+regions[ns_offers]        =  NS offers
+regions[featured_cat_image]   =  Featured Cat image
+regions[event_lead_image]   =  Event lead image
+regions[event_featured_article]   =  Event Featured Article
+regions[event_by_year]   =  Event By year
+regions[event_by_month]   =  Event By Months
+regions[event_content]   =  Event Content
+regions[event_aside]   =  Event aside
+regions[author]        = Author block
+regions[ourwriters_bottom]  = Our writers list
+regions[newsletter]  =  Newsletter
+regions[content_top]  =  Content top
+regions[sidebar_first]  = First Sidebar
+regions[sidebar_second] = Second Sidebar
+regions[sidebar_second_trending] = Second Sidebar Trending
+regions[sidebar_second_youmay] = Second Sidebar youmay
+regions[sidebar_second_podcast] = Second Sidebar pod
+
+
+regions[content]        = Content
+regions[content_disqus]        = Content Disqus
+regions[content_bottom]        = Content Bottom
+regions[content_bottom_longreads]        = Content Bottom Longreads
+regions[article_footer_promotion] = Article footer promotion
+
+
+regions[footer]         = Footer
+
+regions[mainnav_US] 								= Main Nav US
+regions[mainnav2_US] 								= Main Nav 2 US
+regions[subnav_US] 									= Sub Nav US
+regions[ns_offers_america] 							= NS offers America
+regions[the_staggers_US] 							= The Staggers US
+regions[sidebar_second_trending_US] 				= Second Sidebar Trending America
+regions[the_latest_US] 								= The latest America
+regions[article_footer_promotion_US] = Article footer promotion America
+
+regions[home_content_section_1_US] 	=  Home Content Section 1 America
+regions[home_content_section_2_US]  =  Home Content Section 2 America
+regions[home_content_section_3_US]  =  Home Content Section 3 America
+regions[home_content_section_4_US]  =  Home Content Section 4 America
+regions[home_content_section_5_US]  =  Home Content Section 5 America
+regions[home_content_section_6_US]  =  Home Content Section 6 America
+
+
+regions[magazine_sections]  =  Magazine Sections
+
+regions[spot_featured_image_US]  =  Spotlight featured Image America
+
+   
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = comment_user_verification
+features[] = favicon
+features[] = main_menu
+features[] = secondary_menu
+
+settings[breadcrumbs]  = 1
+settings[social_links]  = 1
+settings[twitter_username] = "shanidkv"
+settings[facebook_username] = "shanidkv"
+; Information added by Drupal.org packaging script on 2014-02-22
+//version = "7.x-1.0"
+//core = "7.x"
+project = "NS New design 2015"
+datestamp = "1393064010"
+
