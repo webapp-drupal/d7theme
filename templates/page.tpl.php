@@ -71,27 +71,32 @@
 //drupal_add_library('system', 'ui.accordion');
 //drupal_add_js('jQuery(document).ready(function() {jQuery("#accordion").accordion();});','inline');
 ?>
-<?php 
-  //Vito: https://uk-cb-new-statesman.pantheonsite.io/
+<script type="text/javascript">
+        (function() {
+         
+          if( EV.util.getEVSession() === null ){
+            
+            console.log('NO EVOLOCK SESSION');
+            if ( document.getElementById('test') !== null ) {
+                document.getElementById("test").style.display = "none";
+            };
 
 
-//if(!user_is_logged_in()){
-   //list divs to display on true 
-};
 
-// else statement not realy required 
-//else{
-   //If we will display something instead 
-};
-
-?>
-<?php if(!$logged_in): ?>
+          }
+          else {
+            console.log('EVOLOCK SESSION HERE');
+          }
+        })();
+      </script>
+<div id='test' style="display:block;">ADVARTISE HERE</div>
 <div id='div-out_of_banner'>
   <script type='text/javascript'>
 googletag.display('div-out_of_banner');
 </script>
 </div>
-<?php endif; ?>
+
+
 <?php if(arg(0) == 'long-reads'): ?>
 <div class="page-taxonomy-term long-reads-theme">
 <?php endif; ?>
